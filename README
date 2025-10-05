@@ -1,1 +1,4 @@
 First commit, used already existing python libraries specified in requirements.txt
+You need a .env file where the DISCORD_TOKEN lives.
+It should look like the following
+DISCORD_TOKEN=<insert token gotten from https://discord.com/developers/ here>
