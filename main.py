@@ -3,10 +3,6 @@ from discord.ext import commands
 import logging
 from dotenv import load_dotenv
 import os
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from webdriver_manager.chrome import ChromeDriverManager
 import instaloader
 
 
@@ -29,7 +25,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 
-bot = commands.Bot(command_prefix='!shit', intents=intents)
+bot = commands.Bot(command_prefix='~', intents=intents)
 loader = instaloader.Instaloader(dirname_pattern=".")
 def downloadFunction(str):
     shortcode = str.split("/")[-2]
@@ -60,6 +56,8 @@ async def on_message(message):
             remove_utc_files()
         except discord.HTTPException as e:
             await message.reply("There was an error during the process. Maybe the file is too large?")
+            logging.error("Failed to upload file:%s",file2)
+            
         if os.path.exists(file2):
                 os.remove(file2)    
     await bot.process_commands(message)
