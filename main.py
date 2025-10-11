@@ -19,7 +19,7 @@ def remove_utc_files():
                 print(f"Could not remove {file}: {e}")
 #------------------
 load_dotenv()
-token = os.getenv('DISCORD_TOKEN')
+token = os.environ['DISCORD_TOKEN']
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 intents = discord.Intents.default()
 intents.message_content = True
@@ -55,7 +55,9 @@ async def on_message(message):
             test = await message.reply(file=discord.File(os.getcwd()+"/"+file2, filename="video."+end))
             remove_utc_files()
         except discord.HTTPException as e:
-            await message.reply("There was an error during the process. Maybe the file is too large?")
+            splitMsg = message.content.lower().split("https://www.instagram.com/")[1]
+            reply = "https://www.vxinstagram.com/"+splitMsg
+            await message.reply("Upload failed: attempting to embed it: "+reply)
             logging.error("Failed to upload file:%s",file2)
             
         if os.path.exists(file2):
