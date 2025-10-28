@@ -29,15 +29,18 @@ bot = commands.Bot(command_prefix='~', intents=intents)
 loader = instaloader.Instaloader(dirname_pattern=".")
 def downloadFunction(str):
     shortcode = str.split("/")[-2]
-    post = instaloader.Post.from_shortcode(loader.context, shortcode)
-    loader.download_post(post, target=".")
-    filename_base = loader.format_filename(post)
-    # Check for video or image file
-    for ext in [".mp4", ".jpg"]:
-        file_path = filename_base + ext
-        if os.path.exists(file_path):
-            return file_path
-    return None
+    try:
+        post = instaloader.Post.from_shortcode(loader.context, shortcode)
+        loader.download_post(post, target=".")
+        filename_base = loader.format_filename(post)
+        # Check for video or image file
+        for ext in [".mp4", ".jpg"]:
+            file_path = filename_base + ext
+            if os.path.exists(file_path):
+                return file_path
+        return None
+    except Exception as e:
+        return None
     
 
 @bot.event
@@ -50,18 +53,23 @@ async def on_message(message):
         return
     if "https://www.instagram.com/" in message.content.lower():
         file2 = downloadFunction(message.content.strip())
-        try:
-            end = file2.split(".")[1]
-            test = await message.reply(file=discord.File(os.getcwd()+"/"+file2, filename="video."+end))
-            remove_utc_files()
-        except discord.HTTPException as e:
-            splitMsg = message.content.lower().split("https://www.instagram.com/")[1]
-            reply = "https://www.vxinstagram.com/"+splitMsg
-            await message.reply("Upload failed: attempting to embed it: "+reply)
-            logging.error("Failed to upload file:%s",file2)
-            
-        if os.path.exists(file2):
+        if file2 is not None:
+            try:
+                end = file2.split(".")[1]
+                test = await message.reply(file=discord.File(os.getcwd()+"/"+file2, filename="video."+end))
+                remove_utc_files()
+            except discord.HTTPException as e:
+                splitMsg = message.content.split("https://www.instagram.com/")[1]
+                reply = "https://www.vxinstagram.com/"+splitMsg
+                await message.reply("Upload failed, attempting to embed it: "+reply)
+                logging.error("Failed to upload file:%s",file2)
+            if os.path.exists(file2):
                 os.remove(file2)    
+        else:
+            splitMsg = message.content.split("https://www.instagram.com/")[1]
+            reply = "https://www.vxinstagram.com/"+splitMsg
+            await message.reply("Upload failed, attempting to embed it: "+reply)
+            logging.error("Failed to upload file:%s",file2) 
     await bot.process_commands(message)
 
 
