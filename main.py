@@ -4,19 +4,11 @@ import logging
 from dotenv import load_dotenv
 import os
 import instaloader
+import glob
 
 
 # https://www.youtube.com/watch?v=YD_N6Ffoojw
 
-#------------------
-def remove_utc_files():
-    for file in os.listdir("."):
-        if "UTC" in file:
-            try:
-                if ".mp4" not in file:
-                    os.remove(file)
-            except Exception as e:
-                print(f"Could not remove {file}: {e}")
 #------------------
 load_dotenv()
 token = os.environ['DISCORD_TOKEN']
@@ -26,7 +18,7 @@ intents.message_content = True
 intents.members = True
 
 bot = commands.Bot(command_prefix='~', intents=intents)
-loader = instaloader.Instaloader(dirname_pattern=".")
+loader = instaloader.Instaloader(dirname_pattern="/usr/local/app")
 def downloadFunction(str):
     shortcode = str.split("/")[-2]
     try:
@@ -35,13 +27,26 @@ def downloadFunction(str):
         filename_base = loader.format_filename(post)
         # Check for video or image file
         for ext in [".mp4", ".jpg"]:
-            file_path = filename_base + ext
-            if os.path.exists(file_path):
-                return file_path
+            file_withExt = filename_base + ext
+            if os.path.exists(file_withExt):
+                return file_withExt
         return None
     except Exception as e:
         return None
     
+def removeFunction(str):
+    print("HALLLOOOOO :DDDDD %s",str)
+    try:
+        file_list = glob.glob(str.split(".")[0]+".*")
+        print(file_list)
+        for file in file_list:
+            os.unlink("/usr/local/app/"+file)
+            logging.debug("Deleted file %s", str)
+            print("Deleted file %s", str)
+    except Exception as e:
+        logging.error("Unable to delete file: %s", str)
+        print("Unable to delete file:%s with exception:%s", str, e)
+
 
 @bot.event
 async def on_ready():
@@ -57,20 +62,18 @@ async def on_message(message):
             try:
                 end = file2.split(".")[1]
                 test = await message.reply(file=discord.File(os.getcwd()+"/"+file2, filename="video."+end))
-                remove_utc_files()
             except discord.HTTPException as e:
                 splitMsg = message.content.split("https://www.instagram.com/")[1]
                 reply = "https://www.vxinstagram.com/"+splitMsg
                 await message.reply("Upload failed, attempting to embed it: "+reply)
-                logging.error("Failed to upload file:%s",file2)
-            if os.path.exists(file2):
-                os.remove(file2)    
+                logging.error("Failed to upload file:%s",file2)   
         else:
             splitMsg = message.content.split("https://www.instagram.com/")[1]
             reply = "https://www.vxinstagram.com/"+splitMsg
             await message.reply("Upload failed, attempting to embed it: "+reply)
             logging.error("Failed to upload file:%s",file2) 
     await bot.process_commands(message)
+    removeFunction(file2)
 
 
 bot.run(token, log_handler=handler, log_level=logging.DEBUG)
