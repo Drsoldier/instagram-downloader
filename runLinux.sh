@@ -1,2 +1,2 @@
 docker build . -t x/yipee 
-docker run -e .env x/yipee
+docker run -d -e .env x/yipee
