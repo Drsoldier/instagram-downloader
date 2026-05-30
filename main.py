@@ -18,7 +18,7 @@ intents.message_content = True
 intents.members = True
 
 bot = commands.Bot(command_prefix='~', intents=intents)
-loader = instaloader.Instaloader(dirname_pattern="/usr/local/app")
+loader = instaloader.Instaloader(dirname_pattern="~/app")
 def downloadFunction(str):
     shortcode = str.split("/")[-2]
     try:
@@ -40,7 +40,7 @@ def removeFunction(str):
         file_list = glob.glob(str.split(".")[0]+".*")
         print(file_list)
         for file in file_list:
-            os.unlink("/usr/local/app/"+file)
+            os.remove("~/app"+file)
             logging.debug("Deleted file %s", str)
             print("Deleted file %s", str)
     except Exception as e:
